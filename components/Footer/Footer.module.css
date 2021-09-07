@@ -1,0 +1,29 @@
+.footer {
+  width: 100%;
+  padding: 16px;
+  border-top: 1px solid #eee;
+  text-align: center;
+  justify-content: space-between;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.footer-top {
+  display: flex;
+}
+
+.img-box {
+  width: 50%;
+}
+
+.img-box > p {
+  color: #333;
+  letter-spacing: 3px;
+}
+
+.footer-bottom {
+  padding: 12px;
+  border-top: 1px solid #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
