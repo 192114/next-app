@@ -1,11 +1,11 @@
 const next = require('next')
 
 const devProxy = {
-  '/api': {
-    target: 'https://swapi.co/api/',
-    pathRewrite: {'^/api': '/'},
-    changeOrigin: true,
-  },
+  // '/api': {
+  //   target: 'https://swapi.co/api/',
+  //   pathRewrite: {'^/api': '/'},
+  //   changeOrigin: true,
+  // },
   '/unauthorize': {
     target: 'https://m.yuge.com',
     changeOrigin: true,
