@@ -12,8 +12,10 @@ const News = ({news}) => {
 
   const articleDomRef = useRef(null)
   const audioDomRef = useRef(null)
+  const haveLoadAudio = useRef(false)
 
   const [currentFontSize, setCurrentFontSize] = useState('normal')
+  const [isPlaying, setisPlaying] = useState(false)
 
   const changeFontSize = (e, cur) => {
     e.stopPropagation()
@@ -52,9 +54,36 @@ const News = ({news}) => {
   const onPlayAudio = async (e) => {
     e.stopPropagation()
 
+    if (haveLoadAudio.current) {
+      setisPlaying(!isPlaying)
+      isPlaying ? audioDomRef.current.pause() : audioDomRef.current.play()
+      return
+    }
+
     const data = await request.get(`/unauthorize/newsDetail/audioUrlList/${newsId}`)
 
-    console.log(data)
+    if (data.resultCode === '0') {
+      const { audioUrlList } = data.result
+      haveLoadAudio.current = true
+      let playIndex = 0
+      audioDomRef.current.src = audioUrlList[playIndex]
+
+      audioDomRef.current.addEventListener('ended', () => {
+        if (playIndex >= audioUrlList.length - 1) {
+          setisPlaying(false)
+          return
+        }
+        playIndex += 1
+        audioDomRef.current.src = audioUrlList[playIndex]
+      }, false)
+
+      audioDomRef.current.addEventListener('canplay', () => {
+        if (!isPlaying) {
+          setisPlaying(true)
+        }
+        audioDomRef.current.play()
+      })
+    }
   }
 
   return (
@@ -119,13 +148,12 @@ const News = ({news}) => {
           <span>
             <audio hidden autoPlay ref={audioDomRef} />
             <button
-              // className={styles['active']}
+              className={classnames({[styles['active']]: isPlaying})}
               onClick={onPlayAudio}
             >
               <div className={styles['play-ico']}>
                 <Image
-                  src="/pause-status.svg"
-                  // src="/playing-status.svg"
+                  src={isPlaying ? '/playing-status.svg' : '/pause-status.svg'}
                   alt=""
                   layout="fill"
                 />

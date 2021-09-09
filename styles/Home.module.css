@@ -57,12 +57,22 @@
   background-color: transparent;
   border: 1px solid transparent;
   color: #333;
-  transition: border-color 1s ease;
+  position: relative;
 }
 
-.font-btn button.active {
-  color: #00c7d9;
-  border-bottom: 1px solid #00c7d9;
+.font-btn button::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -6px;
+  left: 0;
+  height: 2px;
+  background-color: #fff;
+  transition: background-color 1s ease;
+}
+
+.font-btn button.active::after {
+  background-color: #00c7d9;
 }
 
 .container img {
