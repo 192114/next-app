@@ -1,4 +1,5 @@
 const next = require('next')
+const express = require('express')
 
 const devProxy = {
   // '/api': {
@@ -6,8 +7,8 @@ const devProxy = {
   //   pathRewrite: {'^/api': '/'},
   //   changeOrigin: true,
   // },
-  '/unauthorize': {
-    target: 'https://m.yuge.com',
+  '/api/': {
+    target: 'https://m.yuge.com/api',
     changeOrigin: true,
   },
 }

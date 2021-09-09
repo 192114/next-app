@@ -42,7 +42,7 @@ const News = ({news}) => {
       if (currentFontSize === 'large' && cur === 'small') {
         step = -4
       }
-      console.log(step)
+      
       item.style.fontSize = `${preFontSize + step}px`
     })
 
