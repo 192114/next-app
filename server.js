@@ -7,8 +7,8 @@ const devProxy = {
   //   pathRewrite: {'^/api': '/'},
   //   changeOrigin: true,
   // },
-  '/api/': {
-    target: 'https://m.yuge.com/api',
+  '/unauthorize': {
+    target: 'https://m.yuge.com',
     changeOrigin: true,
   },
 }
