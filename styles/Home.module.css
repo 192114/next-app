@@ -128,3 +128,14 @@
 .author-box button.active .play-ico {
   animation: rotate 5s infinite linear;
 }
+
+.article-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #666;
+}
+
+.article-ops {
+  display: flex;
+}

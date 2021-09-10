@@ -164,6 +164,27 @@ const News = ({news}) => {
         </div>
 
         <section dangerouslySetInnerHTML={{__html: news.contents}} ref={articleDomRef} />
+
+        <section className={styles['article-foot']}>
+          <span>
+            来源：{news.provenance}
+          </span>
+          <span>
+            阅读（{news.viewCount}）
+          </span>
+        </section>
+
+        <section className={styles['article-ops']}>
+          <button>
+            32
+          </button>
+
+          <button>
+            
+            举报
+          </button>
+        </section>
+
       </article>
     </div>
   )

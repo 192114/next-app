@@ -352,3 +352,9 @@ template {
 [hidden] {
   display: none;
 }
+
+
+/* 其他全局样式 */
+.pt44 {
+  padding-top: 44px;
+}
