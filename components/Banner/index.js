@@ -4,13 +4,15 @@ import styles from './Banner.module.css'
 
 const Banner = () => {
   return (
-    <div className={styles.container}>
-      <Image 
-        src="/tt.png"
-        alt=""
-        layout="fill"
-      />
-    </div>
+    <header className={styles.container}>
+      <div>
+        <Image 
+          src="/tt.png"
+          alt=""
+          layout="fill"
+        />
+      </div>
+    </header>
   )
 }
 
