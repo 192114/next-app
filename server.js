@@ -11,6 +11,10 @@ const devProxy = {
     target: 'https://m.yuge.com',
     changeOrigin: true,
   },
+  '/commWeixin': {
+    target: 'https://m.yuge.com',
+    changeOrigin: true,
+  },
 }
 
 const port = parseInt(process.env.PORT, 10) || 3000
