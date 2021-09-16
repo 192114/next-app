@@ -53,20 +53,19 @@ const axiosInstance = axios.create({
   transformRequest: [
     (data) => {
       if (Object.prototype.toString.call(data).toLowerCase() !== '[object object]') {
-        return `data=${JSON.stringify(data)}`
+        return `data=${data}`
       }
 
       const nextData = {}
-      Object.entries(data).map((item) => {
+      Object.entries(data).forEach((item) => {
         const [key, value] = item
         if (Object.prototype.toString.call(value).toLowerCase() === '[object string]') {
           nextData[key] = encodeURIComponent(value)
+        } else {
+          nextData[key] = item
         }
-
-        nextData[key] = item
-
-        return value
       })
+
       return `data=${JSON.stringify(nextData)}`
     },
   ],
