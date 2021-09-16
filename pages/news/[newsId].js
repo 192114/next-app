@@ -1,21 +1,53 @@
-import React, {useRef, useState} from 'react'
-import Image from 'next/image'
-import classnames from 'classnames'
-import {useRouter} from 'next/dist/client/router'
+import React, { useRef, useState, useEffect } from "react"
+import Image from "next/image"
+import classnames from "classnames"
+import { useRouter } from "next/dist/client/router"
 
-import request from '../../utils/request'
-import styles from '../../styles/Home.module.css'
+import request from "../../utils/request"
+import styles from "../../styles/Home.module.css"
 
-const News = ({news}) => {
-  const router  = useRouter()
+const News = ({ 
+  news, 
+  articleUrl,
+  clientName, 
+}) => {
+  const router = useRouter()
   const { newsId } = router.query
 
   const articleDomRef = useRef(null)
   const audioDomRef = useRef(null)
   const haveLoadAudio = useRef(false)
 
-  const [currentFontSize, setCurrentFontSize] = useState('normal')
+  const [currentFontSize, setCurrentFontSize] = useState("normal")
   const [isPlaying, setisPlaying] = useState(false)
+  const [isMyLike, setIsMyLike] = useState(false)
+
+  useEffect(() => {
+    if (clientName === 'wechat') {
+      const getWxConfigRes = async () => {
+        const data = await request.post("/commWeixin/getSignature", { url: articleUrl })
+        if (data.resultCode === "0") {
+          const { timestamp, nonceStr, signature } = data.result
+  
+          wx.config({
+            debug: true,
+            appId: "wxb25b6a530fffb318", // 必填，公众号的唯一标识
+            timestamp, // 必填，生成签名的时间戳
+            nonceStr, // 必填，生成签名的随机串
+            signature, // 必填，签名
+            jsApiList: [
+              "updateAppMessageShareData", // 分享朋友圈
+              "updateTimelineShareData", // 分享好友
+            ], // 必填，需要使用的JS接口列表
+            openTagList: ["wx-open-launch-app"],
+          })
+        }
+      }
+  
+      getWxConfigRes()
+    }
+
+  })
 
   const changeFontSize = (e, cur) => {
     e.stopPropagation()
@@ -24,27 +56,33 @@ const News = ({news}) => {
       return
     }
 
-    const allDom = articleDomRef.current.querySelectorAll('span')
-    Array.from(allDom).forEach(item => {
+    const allDom = articleDomRef.current.querySelectorAll("span")
+    Array.from(allDom).forEach((item) => {
       const preFontSize = parseInt(item.style.fontSize, 10)
 
       let step = 0
-      if ((currentFontSize === 'small' && cur === 'normal') || (currentFontSize === 'normal' && cur === 'large')) {
+      if (
+        (currentFontSize === "small" && cur === "normal") ||
+        (currentFontSize === "normal" && cur === "large")
+      ) {
         step = 2
       }
 
-      if (currentFontSize === 'small' && cur === 'large') {
+      if (currentFontSize === "small" && cur === "large") {
         step = 4
       }
 
-      if ((currentFontSize === 'normal' && cur === 'small') || (currentFontSize === 'large' && cur === 'normal')) {
+      if (
+        (currentFontSize === "normal" && cur === "small") ||
+        (currentFontSize === "large" && cur === "normal")
+      ) {
         step = -2
       }
 
-      if (currentFontSize === 'large' && cur === 'small') {
+      if (currentFontSize === "large" && cur === "small") {
         step = -4
       }
-      
+
       item.style.fontSize = `${preFontSize + step}px`
     })
 
@@ -60,24 +98,30 @@ const News = ({news}) => {
       return
     }
 
-    const data = await request.get(`/unauthorize/newsDetail/audioUrlList/${newsId}`)
+    const data = await request.get(
+      `/unauthorize/newsDetail/audioUrlList/${newsId}`
+    )
 
-    if (data.resultCode === '0') {
+    if (data.resultCode === "0") {
       const { audioUrlList } = data.result
       haveLoadAudio.current = true
       let playIndex = 0
       audioDomRef.current.src = audioUrlList[playIndex]
 
-      audioDomRef.current.addEventListener('ended', () => {
-        if (playIndex >= audioUrlList.length - 1) {
-          setisPlaying(false)
-          return
-        }
-        playIndex += 1
-        audioDomRef.current.src = audioUrlList[playIndex]
-      }, false)
+      audioDomRef.current.addEventListener(
+        "ended",
+        () => {
+          if (playIndex >= audioUrlList.length - 1) {
+            setisPlaying(false)
+            return
+          }
+          playIndex += 1
+          audioDomRef.current.src = audioUrlList[playIndex]
+        },
+        false
+      )
 
-      audioDomRef.current.addEventListener('canplay', () => {
+      audioDomRef.current.addEventListener("canplay", () => {
         if (!isPlaying) {
           setisPlaying(true)
         }
@@ -86,37 +130,46 @@ const News = ({news}) => {
     }
   }
 
+  const onChangeMyLike = async (e) => {
+    e.stopPropagation()
+
+    setIsMyLike(!isMyLike)
+  }
+
+  const onReport = (e) => {
+    e.preventDefault()
+  }
+
   return (
     <div className={styles.container}>
-
-      <div className={styles['font-tab']}>
-        <div className={styles['font-left']}>
-          <Image
-            src="/font-size.svg"
-            alt=""
-            width="26"
-            height="26"
-          />
+      <div className={styles["font-tab"]}>
+        <div className={styles["font-left"]}>
+          <Image src="/font-size.svg" alt="" width="26" height="26" />
           字号
         </div>
 
-
-        <div className={styles['font-btn']}>
+        <div className={styles["font-btn"]}>
           <button
-            className={classnames({[styles['active']]: currentFontSize === 'small'})}
-            onClick={(e) => changeFontSize(e, 'small')}
+            className={classnames({
+              [styles["active"]]: currentFontSize === "small",
+            })}
+            onClick={(e) => changeFontSize(e, "small")}
           >
             小
           </button>
           <button
-            className={classnames({[styles['active']]: currentFontSize === 'normal'})}
-            onClick={(e) => changeFontSize(e, 'normal')}
+            className={classnames({
+              [styles["active"]]: currentFontSize === "normal",
+            })}
+            onClick={(e) => changeFontSize(e, "normal")}
           >
             标准
           </button>
           <button
-            className={classnames({[styles['active']]: currentFontSize === 'large'})}
-            onClick={(e) => changeFontSize(e, 'large')}
+            className={classnames({
+              [styles["active"]]: currentFontSize === "large",
+            })}
+            onClick={(e) => changeFontSize(e, "large")}
           >
             大
           </button>
@@ -124,36 +177,36 @@ const News = ({news}) => {
       </div>
 
       <article>
-        <h3 className={classnames(styles.title, {
-          [styles.fS20]: currentFontSize === 'small',
-          [styles.fS22]: currentFontSize === 'normal',
-          [styles.fS24]: currentFontSize === 'large',
-        })}>{news.title}</h3>
+        <h3
+          className={classnames(styles.title, {
+            [styles.fS20]: currentFontSize === "small",
+            [styles.fS22]: currentFontSize === "normal",
+            [styles.fS24]: currentFontSize === "large",
+          })}
+        >
+          {news.title}
+        </h3>
 
         <div
-          className={classnames(styles['author-box'], {
-            [styles.fS12]: currentFontSize === 'small',
-            [styles.fS14]: currentFontSize === 'normal',
-            [styles.fS16]: currentFontSize === 'large',
+          className={classnames(styles["author-box"], {
+            [styles.fS12]: currentFontSize === "small",
+            [styles.fS14]: currentFontSize === "normal",
+            [styles.fS16]: currentFontSize === "large",
           })}
         >
           <span>
-            {
-              news.issuingTime
-            }
-            {
-              news.author
-            }
+            {news.issuingTime}
+            {news.author}
           </span>
           <span>
             <audio hidden autoPlay ref={audioDomRef} />
             <button
-              className={classnames({[styles['active']]: isPlaying})}
+              className={classnames({ [styles["active"]]: isPlaying })}
               onClick={onPlayAudio}
             >
-              <div className={styles['play-ico']}>
+              <div className={styles["play-ico"]}>
                 <Image
-                  src={isPlaying ? '/playing-status.svg' : '/pause-status.svg'}
+                  src={isPlaying ? "/playing-status.svg" : "/pause-status.svg"}
                   alt=""
                   layout="fill"
                 />
@@ -163,58 +216,60 @@ const News = ({news}) => {
           </span>
         </div>
 
-        <section dangerouslySetInnerHTML={{__html: news.contents}} ref={articleDomRef} />
+        <section
+          dangerouslySetInnerHTML={{ __html: news.contents }}
+          ref={articleDomRef}
+        />
 
-        <section className={styles['article-foot']}>
-          <span>
-            来源：{news.provenance}
-          </span>
-          <span>
-            阅读（{news.viewCount}）
-          </span>
+        <section className={styles["article-foot"]}>
+          <span>来源：{news.provenance}</span>
+          <span>阅读（{news.viewCount}）</span>
         </section>
 
-        <section className={styles['article-ops']}>
-          <button>
-            32
-          </button>
+        <section className={styles["article-ops"]}>
+          <div
+            className={classnames(styles.heart, { [styles.active]: isMyLike })}
+            onClick={onChangeMyLike}
+          />
 
-          <button>
-            
+          <button className={styles["reaport-btn"]} onClick={onReport}>
+            <div>
+              <Image src="/warn.svg" alt="" width="20" height="20" />
+            </div>
             举报
           </button>
         </section>
-
       </article>
     </div>
   )
 }
 
 const getClientName = (ua) => {
-  if (ua.indexOf('yugeyiliao') >= 0) {
-    return 'app'
-  } else if (ua.indexOf('micromessenger') > -1) {
-    return 'wechat'
+  if (ua.indexOf("yugeyiliao") >= 0) {
+    return "app"
+  } else if (ua.indexOf("micromessenger") > -1) {
+    return "wechat"
   } else {
-    return 'other'
+    return "other"
   }
 }
 
 export async function getServerSideProps(context) {
   // 获取useragent
-  const ua = context.req.headers['user-agent']?.toLowerCase()
+  const ua = context.req.headers["user-agent"]?.toLowerCase()
+  const articleUrl = context.req.headers["referer"]
 
   const clientName = getClientName(ua)
 
-  const {newsId} = context.params
+  const { newsId } = context.params
 
-  const data = await request.get(`https://m.yuge.com/unauthorize/newsDetail/id/${newsId}`)
+  const data = await request.get(
+    `https://m.yuge.com/unauthorize/newsDetail/id/${newsId}`
+  )
 
-  const {
-    news,
-  } = data.result
+  const { news } = data.result
 
-  if (typeof news === 'undefined') {
+  if (typeof news === "undefined") {
     return {
       notFound: true,
     }
@@ -224,9 +279,10 @@ export async function getServerSideProps(context) {
     props: {
       title: news.title,
       desc: news.summary,
-      keyword: news.keywords.map(item => item.name).join(','),
+      keyword: news.keywords.map((item) => item.name).join(","),
       news,
       clientName,
+      articleUrl,
     },
   }
 }
