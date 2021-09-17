@@ -11,7 +11,10 @@ function MyApp({Component, pageProps}) {
     desc,
     keyword,
     clientName,
+    deviceTypeName,
+    articleUrl,
   } = pageProps
+
   return (
     <>
       {
@@ -26,7 +29,11 @@ function MyApp({Component, pageProps}) {
       </Head>
       
       {
-        clientName !== 'app' && <Banner />
+        clientName !== 'app' && <Banner 
+          clientName={clientName}
+          deviceTypeName={deviceTypeName}
+          articleUrl={articleUrl}
+        />
       }
       
       <div className={classnames({ pt44: clientName !== 'app' })}>

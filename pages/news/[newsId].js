@@ -3,32 +3,33 @@ import Image from "next/image"
 import classnames from "classnames"
 import { useRouter } from "next/dist/client/router"
 
+import WithBackNative from "../../components/WithBackNative"
 import request from "../../utils/request"
 import styles from "../../styles/Home.module.css"
 
-const News = ({ 
-  news, 
-  articleUrl,
-  clientName, 
-}) => {
+const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
   const router = useRouter()
   const { newsId } = router.query
 
   const articleDomRef = useRef(null)
   const audioDomRef = useRef(null)
   const haveLoadAudio = useRef(false)
+  const reportReasonDomRef = useRef(null)
 
   const [currentFontSize, setCurrentFontSize] = useState("normal")
   const [isPlaying, setisPlaying] = useState(false)
   const [isMyLike, setIsMyLike] = useState(false)
+  const [reportMaskShow, setReportMaskShow] = useState(false)
 
   useEffect(() => {
-    if (clientName === 'wechat') {
+    if (clientName === "wechat") {
       const getWxConfigRes = async () => {
-        const data = await request.post("/commWeixin/getSignature", { url: articleUrl })
+        const data = await request.post("/commWeixin/getSignature", {
+          url: articleUrl,
+        })
         if (data.resultCode === "0") {
           const { timestamp, nonceStr, signature } = data.result
-  
+
           wx.config({
             debug: true,
             appId: "wxb25b6a530fffb318", // 必填，公众号的唯一标识
@@ -43,10 +44,9 @@ const News = ({
           })
         }
       }
-  
+
       getWxConfigRes()
     }
-
   })
 
   const changeFontSize = (e, cur) => {
@@ -138,6 +138,35 @@ const News = ({
 
   const onReport = (e) => {
     e.preventDefault()
+    if (reportReasonDomRef.current) {
+      reportReasonDomRef.current.value = ''
+    }
+    setReportMaskShow(true)
+  }
+
+  const onSureReport = async (e) => {
+    e.preventDefault()
+
+    const description = reportReasonDomRef.current.value
+
+    if (!description) {
+      window.alert('请输入反馈内容！')
+      return
+    }
+
+    const param = {
+      id: newsId,
+      type: '2',
+      description,
+    }
+
+    const data = await request.post('/unauthorize/commentH5/articleTip', param)
+
+    if (data.resultCode === '0') {
+      window.alert('感谢反馈！')
+    }
+
+    setReportMaskShow(false)
   }
 
   return (
@@ -227,19 +256,74 @@ const News = ({
         </section>
 
         <section className={styles["article-ops"]}>
-          <div
-            className={classnames(styles.heart, { [styles.active]: isMyLike })}
-            onClick={onChangeMyLike}
-          />
+          <div>
+            <WithBackNative
+              clientName={clientName}
+              articleUrl={articleUrl}
+              onClick={onChangeMyLike}
+              deviceTypeName={deviceTypeName}
+            >
+              <div
+                className={classnames(styles.heart, {
+                  [styles.active]: isMyLike,
+                })}
+              />
+            </WithBackNative>
+          </div>
 
-          <button className={styles["reaport-btn"]} onClick={onReport}>
-            <div>
-              <Image src="/warn.svg" alt="" width="20" height="20" />
-            </div>
-            举报
-          </button>
+          <div>
+            <WithBackNative
+              clientName={clientName}
+              articleUrl={articleUrl}
+              onClick={onReport}
+              deviceTypeName={deviceTypeName}
+            >
+              <button className={styles["report-btn"]}>
+                <div>
+                  <Image src="/warn.svg" alt="" width="20" height="20" />
+                </div>
+                举报
+              </button>
+            </WithBackNative>
+          </div>
         </section>
       </article>
+
+      {/* 投诉建议mask  */}
+      {
+        reportMaskShow && (
+          <section className={styles['report-mask']}>
+            <div className={styles['report-mask-content']}>
+              <div className={styles['report-mask-title']}>
+                <span>反馈</span>
+                <button
+                  className={styles['report-mask-title-right']}
+                  onClick={() => setReportMaskShow(false)}
+                >
+                  <Image 
+                    src="/close.svg"
+                    alt=""
+                    layout="fill"
+                  />
+                </button>
+                
+              </div>
+
+              <textarea 
+                placeholder="请输入反馈内容"
+                ref={reportReasonDomRef}
+              />
+
+              <button 
+                className={styles['report-mask-btn']}
+                onClick={onSureReport}
+              >
+                确定
+              </button>
+            </div>
+          </section>
+        )
+      }
     </div>
   )
 }
@@ -254,12 +338,29 @@ const getClientName = (ua) => {
   }
 }
 
+const getDeviceTypeName = (ua) => {
+  const isAndroid = ua.indexOf("Android") > -1 || ua.indexOf("Adr") > -1 //判断是否是 android终端
+  const isIOS = !!ua.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) //判断是否是 iOS终端
+
+  if (isAndroid) {
+    return "android"
+  }
+
+  if (isIOS) {
+    return "ios"
+  }
+
+  return null
+}
+
 export async function getServerSideProps(context) {
   // 获取useragent
-  const ua = context.req.headers["user-agent"]?.toLowerCase()
+  const ua = context.req.headers["user-agent"]
+  const uaLower = ua?.toLowerCase()
   const articleUrl = context.req.headers["referer"]
 
-  const clientName = getClientName(ua)
+  const clientName = getClientName(uaLower)
+  const deviceTypeName = getDeviceTypeName(ua)
 
   const { newsId } = context.params
 
@@ -283,6 +384,7 @@ export async function getServerSideProps(context) {
       news,
       clientName,
       articleUrl,
+      deviceTypeName,
     },
   }
 }
