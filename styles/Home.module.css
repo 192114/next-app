@@ -147,6 +147,11 @@
 }
 
 /* 点赞部分 */
+.zan-box {
+  display: flex;
+  align-items: center;
+}
+
 .heart {
   width: 50px;
   height: 50px;
@@ -158,22 +163,12 @@
   position: relative;
 }
 
-.heart::after {
-  content: '赞一下';
-  font-size: 14px;
-  line-height: 50px;
-  position: absolute;
-  top: 0;
-  left: 50px;
-  width: 50px;
-}
-
 .heart.active {
   transition-duration: 1s;
   background-position: -2825px -25px;
 }
 
-.heart.active::after {
+.heart.active + div {
   color: red;
 }
 
