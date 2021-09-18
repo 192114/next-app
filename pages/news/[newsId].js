@@ -4,6 +4,7 @@ import classnames from "classnames"
 import { useRouter } from "next/dist/client/router"
 
 import WithBackNative from "../../components/WithBackNative"
+import HotArticleList from "../../components/HotArticleList"
 import request from "../../utils/request"
 import styles from "../../styles/Home.module.css"
 
@@ -19,6 +20,7 @@ const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
   const [currentFontSize, setCurrentFontSize] = useState("normal")
   const [isPlaying, setisPlaying] = useState(false)
   const [isMyLike, setIsMyLike] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
   const [reportMaskShow, setReportMaskShow] = useState(false)
 
   useEffect(() => {
@@ -133,7 +135,19 @@ const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
   const onChangeMyLike = async (e) => {
     e.stopPropagation()
 
-    setIsMyLike(!isMyLike)
+    const param = {
+      articleId: newsId,
+      articleType: 'news',
+    }
+
+    const data = await request.post('/unauthorize/commentH5/likeOrCancelLike', param)
+
+    if (data.resultCode === 0) {
+      const {likeCount: lCount} = data.data
+      setLikeCount(lCount)
+      setIsMyLike(!isMyLike)
+    }
+
   }
 
   const onReport = (e) => {
@@ -263,11 +277,16 @@ const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
               onClick={onChangeMyLike}
               deviceTypeName={deviceTypeName}
             >
-              <div
-                className={classnames(styles.heart, {
-                  [styles.active]: isMyLike,
-                })}
-              />
+              <div className={styles['zan-box']}>
+                <div
+                  className={classnames(styles.heart, {
+                    [styles.active]: isMyLike,
+                  })}
+                />
+                <div>
+                  （{likeCount}）
+                </div>
+              </div>
             </WithBackNative>
           </div>
 
@@ -287,6 +306,8 @@ const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
             </WithBackNative>
           </div>
         </section>
+
+        <HotArticleList articleId={newsId} />
       </article>
 
       {/* 投诉建议mask  */}
@@ -369,6 +390,8 @@ export async function getServerSideProps(context) {
   )
 
   const { news } = data.result
+
+  console.log(news)
 
   if (typeof news === "undefined") {
     return {
