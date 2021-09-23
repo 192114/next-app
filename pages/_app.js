@@ -29,14 +29,14 @@ function MyApp({Component, pageProps}) {
       </Head>
       
       {
-        clientName !== 'app' && <Banner 
+        clientName !== 'app' && title && <Banner 
           clientName={clientName}
           deviceTypeName={deviceTypeName}
           articleUrl={articleUrl}
         />
       }
       
-      <div className={classnames({ pt44: clientName !== 'app' })}>
+      <div className={classnames({ pt44: clientName !== 'app' && title })}>
         <Component {...pageProps} />
       </div>
 

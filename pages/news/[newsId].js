@@ -396,6 +396,12 @@ export async function getServerSideProps(context) {
   if (typeof news === "undefined") {
     return {
       notFound: true,
+      props: {
+        clientName,
+        articleUrl,
+        deviceTypeName,
+        isNotFound: true,
+      }
     }
   }
 
@@ -408,6 +414,7 @@ export async function getServerSideProps(context) {
       clientName,
       articleUrl,
       deviceTypeName,
+      isNotFound: false,
     },
   }
 }
