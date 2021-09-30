@@ -5,10 +5,12 @@ import { useRouter } from "next/dist/client/router"
 
 import WithBackNative from "../../components/WithBackNative"
 import HotArticleList from "../../components/HotArticleList"
+import Comment from "../../components/Comment"
+
 import request from "../../utils/request"
 import styles from "../../styles/Home.module.css"
 
-const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
+const News = ({ news, articleUrl, clientName, deviceTypeName, commentList }) => {
   const router = useRouter()
   const { newsId } = router.query
 
@@ -308,6 +310,10 @@ const News = ({ news, articleUrl, clientName, deviceTypeName }) => {
         </section>
 
         <HotArticleList articleId={newsId} />
+
+        <Comment 
+          commentList={commentList}
+        />
       </article>
 
       {/* 投诉建议mask  */}
@@ -391,8 +397,6 @@ export async function getServerSideProps(context) {
 
   const { news } = data.result
 
-  console.log(news)
-
   if (typeof news === "undefined") {
     return {
       notFound: true,
@@ -405,6 +409,18 @@ export async function getServerSideProps(context) {
     }
   }
 
+  const commentData = await request.post('https://m.yuge.com/unauthorize/commentH5/queryArticleComment', {
+    articleId: newsId,
+    articleType: 'news',
+    subCount: '3',
+    startRowKey: '',
+    limit: '3',
+  })
+
+  const { commentList = [] } = commentData.data
+
+  console.log(commentList)
+
   return {
     props: {
       title: news.title,
@@ -415,6 +431,7 @@ export async function getServerSideProps(context) {
       articleUrl,
       deviceTypeName,
       isNotFound: false,
+      commentList,
     },
   }
 }

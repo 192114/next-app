@@ -1,0 +1,49 @@
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.ml12 {
+  margin-left: 12px;
+}
+
+.comment-item {
+  display: flex;
+  margin-top: 10px;
+  align-items:flex-start;
+}
+
+.comment-item-right {
+  margin-left: 12px;
+  flex: 1
+}
+
+.comment-item-right-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-item-right-title span {
+  color: #333;
+  font-size: 14px;
+}
+
+.comment-item-right-title span:nth-child(2) {
+  font-size: 12px;
+}
+
+.comment-item-right-content {
+  font-size: 14px;
+}
+
+.comment-item-right-content .reply-comment-alert {
+  color: #4a90e2;
+  padding: 0 6px;
+}
+
+.comment-reply {
+  background-color: f9f9f9;
+  padding: 0 15px 10px;
+  margin-top: 10px;
+}
